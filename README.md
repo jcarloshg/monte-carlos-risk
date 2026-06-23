@@ -9,4 +9,3 @@ Simulate thousands of possible portfolio paths using historical return distribut
 3. use mockup data
 4. User python
 5. Apply DDD, because in the future I want to connect third api to get more information
-6. Apply all phases about

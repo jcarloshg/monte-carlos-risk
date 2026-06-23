@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://monte-carlo-risk.local/contracts/events.schema.json",
+  "title": "monte-carlo-risk Domain Events v1.0.0",
+  "description": "Frozen JSON Schema for every past-tense domain event emitted inside the monte-carlo-risk CLI. These events are in-process value objects (no message broker in v1, see ADR-005); the schema is the contract between bounded contexts.",
+  "version": "1.0.0",
+  "definitions": {
+    "Ticker": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9.-]+$"
+    },
+    "Holding": {
+      "type": "object",
+      "required": ["ticker", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "ticker": { "$ref": "#/definitions/Ticker" },
+        "weight": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "Portfolio": {
+      "type": "object",
+      "required": ["holdings"],
+      "additionalProperties": false,
+      "properties": {
+        "holdings": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/Holding" }
+        }
+      }
+    },
+    "ReturnMatrix": {
+      "type": "object",
+      "required": ["tickers", "dates", "values", "frequency", "provider_version"],
+      "additionalProperties": false,
+      "properties": {
+        "tickers": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Ticker" }
+        },
+        "dates": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "format": "date" }
+        },
+        "values": {
+          "type": "array",
+          "description": "Shape: [len(dates), len(tickers)]. Daily log returns. Decimal-friendly via JSON number (IEEE-754 double is acceptable for v1 educational scope; v2 may switch to string-encoded Decimal).",
+          "items": {
+            "type": "array",
+            "items": { "type": "number" }
+          }
+        },
+        "frequency": { "type": "string", "enum": ["daily"] },
+        "provider_version": {
+          "type": "string",
+          "description": "Bundled mock data corpus version (matches describe-mock-data stdout). Changes to this string invalidate reproducibility (NFR-4)."
+        }
+      }
+    },
+    "SimulationParameters": {
+      "type": "object",
+      "required": ["n_paths", "horizon", "seed", "provider"],
+      "additionalProperties": false,
+      "properties": {
+        "n_paths": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "horizon": { "type": "integer", "minimum": 1, "maximum": 2520 },
+        "seed": { "type": "integer" },
+        "provider": { "type": "string", "enum": ["mock", "http"] }
+      }
+    },
+    "PathSet": {
+      "type": "object",
+      "required": ["shape", "terminal_wealth", "max_drawdown_per_path"],
+      "additionalProperties": false,
+      "description": "Numerical container for a Monte Carlo run. Stored as JSON for inter-context transport; the in-memory representation may use numpy arrays.",
+      "properties": {
+        "shape": {
+          "type": "object",
+          "required": ["n_paths", "horizon_plus_one"],
+          "properties": {
+            "n_paths": { "type": "integer", "minimum": 1 },
+            "horizon_plus_one": { "type": "integer", "minimum": 2 }
+          }
+        },
+        "terminal_wealth": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "number" }
+        },
+        "max_drawdown_per_path": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "number", "maximum": 0 }
+        }
+      }
+    },
+    "RiskReport": {
+      "type": "object",
+      "required": ["confidence", "var", "cvar", "max_drawdown_distribution", "terminal_wealth_distribution"],
+      "additionalProperties": false,
+      "properties": {
+        "confidence": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1 },
+        "var": { "type": "number", "description": "Positive number = loss." },
+        "cvar": { "type": "number", "description": "Positive number = loss." },
+        "max_drawdown_distribution": {
+          "type": "object",
+          "required": ["mean", "std", "p05", "p50", "p95"],
+          "properties": {
+            "mean": { "type": "number" },
+            "std":  { "type": "number" },
+            "p05":  { "type": "number" },
+            "p50":  { "type": "number" },
+            "p95":  { "type": "number" }
+          }
+        },
+        "terminal_wealth_distribution": {
+          "type": "object",
+          "required": ["mean", "std", "p05", "p50", "p95"],
+          "properties": {
+            "mean": { "type": "number" },
+            "std":  { "type": "number" },
+            "p05":  { "type": "number" },
+            "p50":  { "type": "number" },
+            "p95":  { "type": "number" }
+          }
+        }
+      }
+    },
+    "ChartArtifact": {
+      "type": "object",
+      "required": ["kind", "absolute_path", "format"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": ["paths", "drawdown", "fan_chart"] },
+        "absolute_path": { "type": "string" },
+        "format": { "type": "string", "enum": ["png"] }
+      }
+    },
+    "RunId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  },
+  "events": {
+    "PortfolioDefined": {
+      "event": "PortfolioDefined",
+      "source_context": "Portfolio",
+      "payload": { "$ref": "#/definitions/Portfolio" }
+    },
+    "MarketDataLoaded": {
+      "event": "MarketDataLoaded",
+      "source_context": "Infrastructure",
+      "payload": { "$ref": "#/definitions/ReturnMatrix" }
+    },
+    "SimulationStarted": {
+      "event": "SimulationStarted",
+      "source_context": "Application",
+      "payload": {
+        "type": "object",
+        "required": ["portfolio", "parameters", "return_matrix_shape"],
+        "properties": {
+          "portfolio": { "$ref": "#/definitions/Portfolio" },
+          "parameters": { "$ref": "#/definitions/SimulationParameters" },
+          "return_matrix_shape": {
+            "type": "object",
+            "properties": {
+              "n_dates": { "type": "integer" },
+              "n_tickers": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+    "SimulationCompleted": {
+      "event": "SimulationCompleted",
+      "source_context": "Simulation",
+      "payload": { "$ref": "#/definitions/PathSet" }
+    },
+    "RiskMetricsCalculated": {
+      "event": "RiskMetricsCalculated",
+      "source_context": "RiskMetrics",
+      "payload": { "$ref": "#/definitions/RiskReport" }
+    },
+    "ChartsRendered": {
+      "event": "ChartsRendered",
+      "source_context": "Visualization",
+      "payload": {
+        "type": "object",
+        "required": ["artifacts"],
+        "properties": {
+          "artifacts": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/definitions/ChartArtifact" }
+          }
+        }
+      }
+    }
+  },
+  "invariants": [
+    "Every event MUST carry a run_id field at the envelope level (added by the application orchestrator, not by individual contexts).",
+    "Events are emitted in the order: PortfolioDefined -> MarketDataLoaded -> SimulationStarted -> SimulationCompleted -> RiskMetricsCalculated -> ChartsRendered. The orchestrator enforces this ordering; individual contexts do not emit out of order.",
+    "Payloads are value objects: they are deep-immutable once emitted. Re-emitting a corrected event requires a new run_id."
+  ]
+}
