@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mc-risk.local/contracts/events/envelope.schema.json",
+  "title": "EventEnvelope",
+  "description": "Common envelope for every event written to ./output/<runId>/events.jsonl. The payload schema is referenced per-event-type in contracts/events/<event_type>.schema.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "sequenceNumber",
+    "correlationId",
+    "occurredAt",
+    "eventType"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "runId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sequenceNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Strictly increasing per runId. Defines causal order (Defining 200-Q1.5)."
+    },
+    "correlationId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Generated at CLI entry, propagated through the use case (Defining 300-Q6.2)."
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC. Produced by the injected Clock."
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "SimulationRequested",
+        "ReturnsLoaded",
+        "PathSampled",
+        "DrawdownComputed",
+        "RiskMetricsCalculated",
+        "SimulationCompleted",
+        "SimulationFailed"
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "description": "Discriminated by eventType; one of contracts/events/*.schema.json."
+    }
+  }
+}
