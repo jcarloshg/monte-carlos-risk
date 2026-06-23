@@ -1,8 +1,8 @@
 ---
-# CLI Contract — monte-carlo-risk v1.0.0
+# CLI Contract — monte-carlo-risk v1.1.0
 #
 # Frozen on: 2026-06-23
-# Version: v1.0.0
+# Version: v1.1.0
 # Source: ADR-005 (CLI-only v1)
 # Consuming phases: 200 (Designing), 300 (Coding), 400 (Testing)
 #
@@ -341,6 +341,7 @@ schemas:
           - visualization_failed
           - output_dir_not_writable
           - invalid_simulation_transition
+          - cli_argument_error
       message:
         type: string
         description: Human-readable explanation.
@@ -367,3 +368,8 @@ versioning:
   supersession: >
     A new contract version supersedes the previous one. CI must verify
     the CLI's actual --help output matches the contract.
+
+# ============================================================
+# Changelog
+# ============================================================
+# 2026-06-23 v1.1.0 — added error_code "cli_argument_error" (task-003).

@@ -1,4 +1,4 @@
-from monte_carlo_risk import __version__
+from monte_carlo_risk.interface.cli.app import app
 
 if __name__ == "__main__":
-    print(__version__)  # Tracer Bullet placeholder; replaced by Typer app in task-003
+    app()
