@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mc-risk.local/contracts/events/returns_loaded.schema.json",
+  "title": "ReturnsLoaded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["observationCount", "startDate", "endDate", "symbols"],
+  "properties": {
+    "observationCount": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of daily return observations loaded from the CSV."
+    },
+    "startDate": { "type": "string", "format": "date" },
+    "endDate": { "type": "string", "format": "date" },
+    "symbols": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^MOCK-[A-Z]{1,8}$" },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  }
+}

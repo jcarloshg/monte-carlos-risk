@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mc-risk.local/contracts/events/simulation_requested.schema.json",
+  "title": "SimulationRequested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["portfolioId", "horizon", "numberOfPaths", "confidenceLevels", "seed"],
+  "properties": {
+    "portfolioId": { "type": "string", "format": "uuid" },
+    "horizon": { "type": "integer", "minimum": 1, "maximum": 10000 },
+    "numberOfPaths": { "type": "integer", "minimum": 100, "maximum": 1000000 },
+    "confidenceLevels": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1 },
+      "uniqueItems": true
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615,
+      "description": "Always present. If the input profile had seed=null, the engine generates one and emits it here (Defining Q1.6 invariant)."
+    }
+  }
+}

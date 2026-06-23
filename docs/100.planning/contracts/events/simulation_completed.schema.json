@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mc-risk.local/contracts/events/simulation_completed.schema.json",
+  "title": "SimulationCompleted",
+  "description": "Terminal event. Run transitions to COMPLETED on emission. riskMetrics must equal the latest RiskMetricsCalculated payload (Defining 200-Q1.5 invariant).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["durationMs", "totalPaths"],
+  "properties": {
+    "durationMs": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total wall-clock duration from SimulationRequested to completion."
+    },
+    "totalPaths": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 1000000,
+      "description": "Must equal SimulationRequested.numberOfPaths."
+    },
+    "outputArtifacts": {
+      "type": "array",
+      "description": "Files written under ./output/<runId>/. Always includes metrics.json and at least one PNG.",
+      "items": {
+        "type": "string",
+        "pattern": "^(metrics\\.json|fan_chart\\.png|drawdown_histogram\\.png|terminal_wealth_histogram\\.png)$"
+      },
+      "minItems": 2
+    }
+  }
+}
