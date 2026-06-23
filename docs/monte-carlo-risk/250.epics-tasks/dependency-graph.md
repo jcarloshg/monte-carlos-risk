@@ -11,7 +11,7 @@ Read top-to-bottom. A task can be picked up only when **every** entry in its `De
 | Task     | Title                                      | Layer          | Epic | Sprint | Depends on                   | Owner     | Status |
 | -------- | ------------------------------------------ | -------------- | ---- | ------ | ---------------------------- | --------- | ------ |
 | task-001 | dev-tooling-bootstrap                      | Infra          | 001  | 01     | none                         | jcarloshg | Done   |
-| task-002 | shared-kernel-value-objects                | Domain         | 001  | 01     | task-001                     | jcarloshg |        |
+| task-002 | shared-kernel-value-objects                | Domain         | 001  | 01     | task-001                     | jcarloshg | Done   |
 | task-003 | cli-describe-mock-data-stub                | Transport      | 001  | 01     | task-002                     | jcarloshg |
 | task-004 | import-linter-and-ci-pipeline              | Defense        | 001  | 01     | task-003                     | jcarloshg |
 | task-005 | portfolio-shared-kernel-extensions         | Domain         | 002  | 02     | task-002                     | jcarloshg |
