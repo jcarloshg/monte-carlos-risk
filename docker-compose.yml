@@ -1,0 +1,9 @@
+services:
+  monte-carlo:
+    build: .
+    image: monte-carlo-risk:dev
+    container_name: monte-carlo
+    stdin_open: true
+    tty: true
+    working_dir: /app
+    user: app
